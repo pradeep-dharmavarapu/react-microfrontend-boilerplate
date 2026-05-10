@@ -2,6 +2,11 @@
 declare module 'mfeDashboard/*';
 declare module 'mfeAnalytics/*';
 
+// Ambient module declarations for Module Federation remotes (keeps TypeScript happy
+// without adding a separate declaration file)
+declare module 'mfeDashboard/*';
+declare module 'mfeAnalytics/*';
+
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
 import { Provider } from 'react-redux';
