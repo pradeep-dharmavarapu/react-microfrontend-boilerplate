@@ -1,0 +1,22 @@
+{
+  "name": "react-mfe-boilerplate",
+  "private": true,
+  "workspaces": ["shell", "mfe-dashboard", "mfe-analytics", "shared-components"],
+  "scripts": {
+    "start": "concurrently \"npm run start:shell\" \"npm run start:dashboard\" \"npm run start:analytics\"",
+    "start:shell": "npm run start --workspace=shell",
+    "start:dashboard": "npm run start --workspace=mfe-dashboard",
+    "start:analytics": "npm run start --workspace=mfe-analytics",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "eslint . --ext .ts,.tsx",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0",
+    "typescript": "^5.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0"
+  }
+}
