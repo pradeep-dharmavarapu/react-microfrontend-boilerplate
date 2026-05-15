@@ -1,22 +1,17 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "ESNext",
+    "lib": ["ES2020", "DOM"],
     "jsx": "react-jsx",
-    "moduleResolution": "Node",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": false,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "isolatedModules": true,
-  "noEmit": false,
-    "baseUrl": "./",
-    "paths": {
-      "mfeDashboard/*": ["../mfe-dashboard/src/*"],
-      "mfeAnalytics/*": ["../mfe-analytics/src/*"]
-    }
+    "allowJs": true,
+    "outDir": "./dist"
   },
-  "include": ["src/**/*"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }
