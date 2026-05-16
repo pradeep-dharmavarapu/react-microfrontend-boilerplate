@@ -1,196 +1,158 @@
-# React Micro-Frontend Boilerplate
+# Pulse Command - React Microfrontend Shell
 
-> **Production-grade Micro-Frontend architecture with Module Federation, shared Redux store, TypeScript, and independent CI/CD pipelines.**
+> A premium Personal Command Center built with React, TypeScript, and Vite. The app presents a polished shell experience with remote-ready microfrontend surfaces, command-first navigation, personalization controls, and resilient fallback states.
 
-[![CI/CD](https://github.com/pradeep-kumar-dharmavarapu/react-mfe-boilerplate/actions/workflows/ci.yml/badge.svg)](https://github.com/pradeep-kumar-dharmavarapu/react-mfe-boilerplate/actions)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18-61dafb)](https://react.dev)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Vite](https://img.shields.io/badge/Vite-5-646cff)](https://vitejs.dev/)
 
-🚀 **[Live Demo](https://react-mfe-boilerplate.vercel.app)** | 📖 **[Architecture Guide](#architecture)**
+## Why This Project Stands Out
 
----
+Most microfrontend demos feel like architecture diagrams with placeholder cards. Pulse Command is designed to feel like a real product: a personal operating surface where each future remote app can own a focused part of the user experience.
 
-## Why This Exists
+The current shell includes:
 
-At T-Mobile's Orion platform, 5 independent engineering teams were building dashboards on a monolithic frontend. Every release required coordinating across all teams. A bug in one team's feature could block everyone's deployment.
+- Premium dashboard UI inspired by modern fintech and productivity products
+- Command palette with keyboard shortcut support
+- Personalization rail with theme, density, and privacy controls
+- Remote-ready workspace for Focus, Insights, and Profile micro apps
+- Error boundary and fallback pattern for unavailable remote surfaces
+- Responsive layout for desktop and smaller screens
+- Clean React structure with separated components, views, data, types, and styles
 
-We moved to Micro-Frontend architecture with Module Federation. The result:
-- **Release cadence: monthly → weekly**
-- **Cross-team deployment conflicts: eliminated**
-- **New feature delivery time: 2 weeks → same day**
+## Live Experience
 
-This boilerplate captures the exact patterns that made it work — cleaned up and documented for anyone to use.
+The demo opens directly into the usable app, not a marketing page:
 
----
+- `Today`: high-signal personal dashboard
+- `Workspace`: micro app registry and remote fallback surface
+- `Insights`: behavior intelligence and suggested automations
+
+## What This App Is About
+
+Pulse Command is a **Personal Command Center** demo. The product idea is simple: give a user one premium control surface for their day, while letting different business capabilities evolve as independent micro apps.
+
+In a real company, separate teams could own these surfaces:
+
+- `Shell`: navigation, layout, themes, personalization, resilience, and app composition
+- `Focus MFE`: tasks, calendar protection, deep work sessions, rituals
+- `Insights MFE`: behavior analytics, productivity patterns, recommendations
+- `Profile MFE`: preferences, permissions, saved layouts, identity
+
+This repo currently implements the shell and polished placeholder surfaces. The placeholder exists to show where a real remote microfrontend would be loaded later.
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    Shell (port 3000)                     │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
-│  │  Navigation  │  │   Auth/Redux  │  │   Routing    │  │
-│  └──────────────┘  └──────────────┘  └──────────────┘  │
-│           │                │                │           │
-│    ┌──────▼────────────────▼────────────────▼──────┐   │
-│    │          Module Federation Host               │   │
-│    └──────┬─────────────────────────────────┬──────┘   │
-└───────────┼─────────────────────────────────┼──────────┘
-            │ Dynamic Remote                  │ Dynamic Remote
-            ▼                                 ▼
-┌───────────────────────┐         ┌───────────────────────┐
-│  Dashboard MFE        │         │  Analytics MFE        │
-│  (port 3001)          │         │  (port 3002)          │
-│  Independently        │         │  Independently        │
-│  deployable           │         │  deployable           │
-└───────────────────────┘         └───────────────────────┘
-            │                                 │
-            └──────────────┬──────────────────┘
-                           ▼
-              ┌────────────────────────┐
-              │   Shared Components    │
-              │   (npm package)        │
-              │   Button, Modal,       │
-              │   DataTable, Charts    │
-              └────────────────────────┘
+```mermaid
+flowchart TD
+  User["User"] --> Shell["Pulse Command Shell<br/>React + TypeScript + Vite"]
+
+  Shell --> Navigation["Navigation + App Layout"]
+  Shell --> Personalization["Theme, Density, Privacy Controls"]
+  Shell --> Views["Today / Workspace / Insights Views"]
+  Shell --> Boundary["MFE Error Boundary"]
+
+  Boundary --> Resolver["Runtime Remote Resolver<br/>window.__MFE_CONFIG__"]
+
+  Resolver --> Focus["Focus MFE<br/>Tasks + Calendar + Sprints"]
+  Resolver --> Insights["Insights MFE<br/>Analytics + Recommendations"]
+  Resolver --> Profile["Profile MFE<br/>Preferences + Identity"]
+
+  Focus --> Fallback["Fallback UI if remote is offline"]
+  Insights --> Fallback
+  Profile --> Fallback
+
+  Shell --> Build["Vercel Build<br/>npm install + npm run build"]
+  Build --> Dist["shell/dist"]
 ```
 
-### Key Architecture Decisions
+### Runtime Remote Config
 
-**Dynamic Remotes** — MFE URLs are resolved at runtime from a config object (`window.__MFE_CONFIG__`). This means the shell never needs to be rebuilt when an MFE is redeployed. Just update the config.
+`window.__MFE_CONFIG__` is a common microfrontend pattern. It is a runtime object that tells the shell where each independently deployed remote app lives.
 
-**Singleton Shared Dependencies** — React, ReactDOM, Redux, and React Router are shared as singletons. Each MFE uses the same instance, preventing version conflicts and reducing bundle size.
+Example:
 
-**Error Boundaries per MFE** — Each remote is wrapped in an Error Boundary. A crash in the Dashboard MFE never brings down the Analytics MFE or the Shell.
-
-**Shared Redux Store** — The shell owns the store. MFEs receive store access via React context. Auth state, UI state, and cross-MFE notifications are managed centrally.
-
----
-
-## Project Structure
-
-```
-react-mfe-boilerplate/
-├── shell/                    # Host application (port 3000)
-│   ├── src/
-│   │   ├── App.tsx           # Root with routing + Redux Provider
-│   │   ├── store.ts          # Shared Redux store + typed hooks
-│   │   └── components/
-│   │       ├── ErrorBoundary.tsx
-│   │       └── MFELoader.tsx
-│   └── webpack.config.js     # Module Federation host config
-│
-├── mfe-dashboard/            # Dashboard micro-frontend (port 3001)
-│   ├── src/
-│   │   ├── App.tsx           # MFE root — exported as remote
-│   │   ├── components/
-│   │   └── store/            # Local MFE state (extends shared store)
-│   └── webpack.config.js     # Module Federation remote config
-│
-├── mfe-analytics/            # Analytics micro-frontend (port 3002)
-│   ├── src/
-│   └── webpack.config.js
-│
-├── shared-components/        # Shared UI library (publishable npm package)
-│   ├── src/
-│   │   ├── Button/
-│   │   ├── DataTable/
-│   │   ├── Modal/
-│   │   └── index.ts
-│   └── package.json
-│
-└── .github/
-    └── workflows/
-        └── ci.yml            # Parallel MFE builds + independent deploys
-```
-
----
-
-## Quick Start
-
-```bash
-# Clone
-git clone https://github.com/pradeep-kumar-dharmavarapu/react-mfe-boilerplate
-cd react-mfe-boilerplate
-
-# Install all workspaces
-npm install
-
-# Start all apps in parallel
-npm start
-# Shell:     http://localhost:3000
-# Dashboard: http://localhost:3001
-# Analytics: http://localhost:3002
-```
-
----
-
-## Independent Deployment
-
-Each MFE deploys independently. The shell never needs to be rebuilt:
-
-```bash
-# Deploy only the Dashboard MFE
-npm run build --workspace=mfe-dashboard
-# Upload mfe-dashboard/dist/ to your CDN
-
-# Update the runtime config (no shell rebuild needed)
+```ts
 window.__MFE_CONFIG__ = {
-  dashboard: 'https://cdn.yourapp.com/dashboard/remoteEntry.js',
-  analytics: 'https://cdn.yourapp.com/analytics/remoteEntry.js',
+  focusRemote: 'https://cdn.example.com/focus/remoteEntry.js',
+  insightsRemote: 'https://cdn.example.com/insights/remoteEntry.js',
+  profileRemote: 'https://cdn.example.com/profile/remoteEntry.js',
 };
 ```
 
----
+Why this matters: the shell can stay deployed while a remote team ships a new version of `Insights MFE` to its own CDN URL. The shell reads the config at runtime and loads the latest remote without needing a full shell rebuild.
 
-## Shared Components
+In this portfolio version, the real remotes are not wired yet. The Workspace view shows the intended remote slots and a fallback UI so reviewers can understand the architecture direction.
 
-The `shared-components` package is published as an npm package and consumed by both MFEs:
-
-```bash
-cd shared-components
-npm run build
-npm publish
+```txt
+shell/
+├── index.html
+├── src/
+│   ├── App.tsx                  # Application orchestrator
+│   ├── main.tsx                 # Vite entry
+│   ├── components/              # Reusable UI and MFE resilience components
+│   ├── views/                   # Route-level product surfaces
+│   ├── data/                    # Mock product data and theme tokens
+│   ├── styles/                  # Command Center CSS
+│   └── types.ts                 # Shared domain types
+├── package.json
+├── tsconfig.json
+└── vite.config.ts
 ```
 
-Components include: `Button`, `DataTable`, `Modal`, `Spinner`, `Notification`, `Badge`
+The shell is intentionally structured so real remotes can be added behind the existing workspace cards. Until those remotes are wired in, the fallback surface demonstrates how the shell keeps the product usable when a microfrontend is unavailable.
 
----
+## Getting Started
 
-## What's Included
+```bash
+npm install
+npm run dev
+```
 
-| Feature | Status |
-|---|---|
-| Module Federation (dynamic remotes) | ✅ |
-| Shared Redux store with typed hooks | ✅ |
-| TypeScript throughout | ✅ |
-| Error boundaries per MFE | ✅ |
-| Shared component library | ✅ |
-| CI/CD with parallel MFE builds | ✅ |
-| Independent deployment per MFE | ✅ |
-| Hot module replacement in dev | ✅ |
-| Jest + React Testing Library | ✅ |
-| ESLint + Prettier | ✅ |
-| Nx monorepo migration guide | 📋 Planned |
-| Vite support | 📋 Planned |
+Open:
 
----
+```txt
+http://localhost:3000
+```
 
-## Based on Real Production Architecture
+## Scripts
 
-This boilerplate is derived from a production micro-frontend system built at **T-Mobile's Orion network operations platform** — serving multiple engineering teams across large-scale operational dashboards.
+```bash
+npm run dev       # Start the Vite dev server
+npm run build     # Type-check and build for production
+npm run preview   # Preview the production build locally
+```
 
-Read the full story: [How We Went From Monthly to Weekly Releases with Micro-Frontends](https://medium.com/@pradeepdharmavarapu)
+## Deployment
 
----
+This repo is ready for Vercel. The root `vercel.json` builds the `shell` workspace and serves `shell/dist`.
+
+Recommended Vercel settings:
+
+- Framework Preset: `Vite`
+- Build Command: `npm run build`
+- Output Directory: `shell/dist`
+- Install Command: `npm install`
+
+## Recruiter / Reviewer Notes
+
+This project is meant to show more than basic React rendering. It demonstrates:
+
+- Component decomposition and UI ownership boundaries
+- Typed React props and shared domain types
+- Product-thinking in a technical demo
+- Resilient shell patterns for microfrontend-style apps
+- Responsive CSS architecture without depending on a heavy UI kit
+
+## Next Improvements
+
+- Add real remote apps using Vite Module Federation
+- Persist personalization settings in local storage
+- Add route URLs for `Today`, `Workspace`, and `Insights`
+- Add unit tests for component behavior
+- Add Playwright smoke tests for the command palette and navigation
 
 ## Author
 
-**Pradeep Kumar Dharmavarapu** — Frontend Architect
+**Pradeep Kumar Dharmavarapu**  
 [LinkedIn](https://linkedin.com/in/pradeep-kumar-dharmavarapu) · [GitHub](https://github.com/pradeep-kumar-dharmavarapu)
-
----
-
-## License
-MIT © Pradeep Kumar Dharmavarapu
