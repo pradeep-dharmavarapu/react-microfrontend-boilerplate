@@ -2,8 +2,10 @@
   "name": "react-microfrontend-boilerplate",
   "private": true,
   "scripts": {
-    "start": "npm run start --workspace=shell",
+    "dev": "npm run dev --workspace=shell",
+    "start": "npm run dev --workspace=shell",
     "build": "npm run build --workspace=shell",
+    "preview": "npm run preview --workspace=shell",
     "install:all": "npm install --workspace=shell"
   },
   "workspaces": ["shell"]

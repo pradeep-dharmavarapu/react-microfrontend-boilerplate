@@ -1,7 +1,7 @@
 {
   "outputDirectory": "shell/dist",
-  "buildCommand": "echo 'pre-built'",
-  "installCommand": "echo 'no install needed'",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
