@@ -152,6 +152,8 @@ This project is meant to show more than basic React rendering. It demonstrates:
 - Add unit tests for component behavior
 - Add Playwright smoke tests for the command palette and navigation
 
+## DEMO - https://react-microfrontend-shell.vercel.app/
+
 ## Author
 
 **Pradeep Kumar Dharmavarapu**  
