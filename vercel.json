@@ -1,5 +1,5 @@
 {
-  "outputDirectory": "shell/dist",
+  "outputDirectory": "dist/apps/shell",
   "buildCommand": "npm run build",
   "installCommand": "npm install",
   "rewrites": [

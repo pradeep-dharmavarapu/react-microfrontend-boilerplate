@@ -1,12 +1,35 @@
 {
-  "name": "react-microfrontend-boilerplate",
+  "name": "pulse-command-mfe-platform",
   "private": true,
   "scripts": {
-    "dev": "npm run dev --workspace=shell",
-    "start": "npm run dev --workspace=shell",
-    "build": "npm run build --workspace=shell",
-    "preview": "npm run preview --workspace=shell",
-    "install:all": "npm install --workspace=shell"
+    "dev": "nx run-many -t serve -p focus insights shell --parallel=3",
+    "dev:shell": "nx serve shell",
+    "dev:focus": "nx serve focus",
+    "dev:insights": "nx serve insights",
+    "build": "nx run-many -t build -p focus insights shell",
+    "build:shell": "nx build shell",
+    "build:focus": "nx build focus",
+    "build:insights": "nx build insights",
+    "affected:build": "nx affected -t build",
+    "graph": "nx graph",
+    "preview:shell": "nx preview shell"
   },
-  "workspaces": ["shell"]
+  "dependencies": {
+    "@vitejs/plugin-react": "^4.7.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "vite": "^5.4.21"
+  },
+  "devDependencies": {
+    "@nx/js": "^22.7.5",
+    "@nx/react": "^22.7.5",
+    "@nx/vite": "^22.7.5",
+    "@nx/web": "^22.7.5",
+    "@nx/workspace": "^22.7.5",
+    "@originjs/vite-plugin-federation": "^1.4.1",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "nx": "^22.7.5",
+    "typescript": "^5.9.3"
+  }
 }

@@ -1,111 +1,107 @@
-# Pulse Command - React Microfrontend Shell
+# Pulse Command - Nx Microfrontend Boilerplate
 
-> A premium Personal Command Center built with React, TypeScript, and Vite. The app presents a polished shell experience with remote-ready microfrontend surfaces, command-first navigation, personalization controls, and resilient fallback states.
+> I built this as a practical React microfrontend boilerplate using Nx, Vite, Module Federation, TypeScript, and separately buildable host/remote apps.
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue)](https://www.typescriptlang.org/)
+[![Nx](https://img.shields.io/badge/Nx-Monorepo-143055)](https://nx.dev)
 [![React](https://img.shields.io/badge/React-18-61dafb)](https://react.dev)
 [![Vite](https://img.shields.io/badge/Vite-5-646cff)](https://vitejs.dev/)
+[![Module Federation](https://img.shields.io/badge/Module%20Federation-Enabled-e8c270)](https://module-federation.io/)
 
-## Why This Project Stands Out
+## What I Built
 
-Most microfrontend demos feel like architecture diagrams with placeholder cards. Pulse Command is designed to feel like a real product: a personal operating surface where each future remote app can own a focused part of the user experience.
+I wanted this project to show microfrontend architecture clearly, not just look like another dashboard template.
 
-The current shell includes:
+The app is an interactive walkthrough. When you click through the sections, it explains how the Nx workspace is organized, how Module Federation loads the remotes, and how each app can be built separately.
 
-- Premium dashboard UI inspired by modern fintech and productivity products
-- Command palette with keyboard shortcut support
-- Personalization rail with theme, density, and privacy controls
-- Remote-ready workspace for Focus, Insights, and Profile micro apps
-- Error boundary and fallback pattern for unavailable remote surfaces
-- Responsive layout for desktop and smaller screens
-- Clean React structure with separated components, views, data, types, and styles
+The repo has four main pieces:
 
-## Live Experience
-
-The demo opens directly into the usable app, not a marketing page:
-
-- `Today`: high-signal personal dashboard
-- `Workspace`: micro app registry and remote fallback surface
-- `Insights`: behavior intelligence and suggested automations
-
-## What This App Is About
-
-Pulse Command is a **Personal Command Center** demo. The product idea is simple: give a user one premium control surface for their day, while letting different business capabilities evolve as independent micro apps.
-
-In a real company, separate teams could own these surfaces:
-
-- `Shell`: navigation, layout, themes, personalization, resilience, and app composition
-- `Focus MFE`: tasks, calendar protection, deep work sessions, rituals
-- `Insights MFE`: behavior analytics, productivity patterns, recommendations
-- `Profile MFE`: preferences, permissions, saved layouts, identity
-
-This repo currently implements the shell and polished placeholder surfaces. The placeholder exists to show where a real remote microfrontend would be loaded later.
+- `shell`: the host app that owns layout, navigation, composition, and fallback handling
+- `focus`: a remote app that represents one independently deployable feature area
+- `insights`: another remote app that is loaded by the shell at runtime
+- `ui`: a small shared library for common copy/types used across the apps
 
 ## Architecture
 
 ```mermaid
 flowchart TD
-  User["User"] --> Shell["Pulse Command Shell<br/>React + TypeScript + Vite"]
+  Dev["Developer"] --> Nx["Nx monorepo"]
 
-  Shell --> Navigation["Navigation + App Layout"]
-  Shell --> Personalization["Theme, Density, Privacy Controls"]
-  Shell --> Views["Today / Workspace / Insights Views"]
-  Shell --> Boundary["MFE Error Boundary"]
+  Nx --> ShellBuild["nx build shell"]
+  Nx --> FocusBuild["nx build focus"]
+  Nx --> InsightsBuild["nx build insights"]
 
-  Boundary --> Resolver["Runtime Remote Resolver<br/>window.__MFE_CONFIG__"]
+  ShellBuild --> ShellDist["dist/apps/shell<br/>host deployment"]
+  FocusBuild --> FocusDist["dist/apps/focus<br/>remote deployment"]
+  InsightsBuild --> InsightsDist["dist/apps/insights<br/>remote deployment"]
 
-  Resolver --> Focus["Focus MFE<br/>Tasks + Calendar + Sprints"]
-  Resolver --> Insights["Insights MFE<br/>Analytics + Recommendations"]
-  Resolver --> Profile["Profile MFE<br/>Preferences + Identity"]
+  Browser["Browser"] --> Shell["Shell host<br/>localhost:3000"]
+  Shell --> Federation["Vite Module Federation"]
+  Federation --> FocusRemote["Focus remote<br/>localhost:4201<br/>remoteEntry.js"]
+  Federation --> InsightsRemote["Insights remote<br/>localhost:4202<br/>remoteEntry.js"]
 
-  Focus --> Fallback["Fallback UI if remote is offline"]
-  Insights --> Fallback
-  Profile --> Fallback
+  Shell --> Boundary["Error boundary"]
+  Boundary --> Fallback["Fallback UI if a remote is unavailable"]
 
-  Shell --> Build["Vercel Build<br/>npm install + npm run build"]
-  Build --> Dist["shell/dist"]
+  Shared["libs/ui"] --> Shell
+  Shared --> FocusRemote
+  Shared --> InsightsRemote
 ```
 
-### Runtime Remote Config
-
-`window.__MFE_CONFIG__` is a common microfrontend pattern. It is a runtime object that tells the shell where each independently deployed remote app lives.
-
-Example:
-
-```ts
-window.__MFE_CONFIG__ = {
-  focusRemote: 'https://cdn.example.com/focus/remoteEntry.js',
-  insightsRemote: 'https://cdn.example.com/insights/remoteEntry.js',
-  profileRemote: 'https://cdn.example.com/profile/remoteEntry.js',
-};
-```
-
-Why this matters: the shell can stay deployed while a remote team ships a new version of `Insights MFE` to its own CDN URL. The shell reads the config at runtime and loads the latest remote without needing a full shell rebuild.
-
-In this portfolio version, the real remotes are not wired yet. The Workspace view shows the intended remote slots and a fallback UI so reviewers can understand the architecture direction.
+## Project Structure
 
 ```txt
-shell/
-├── index.html
-├── src/
-│   ├── App.tsx                  # Application orchestrator
-│   ├── main.tsx                 # Vite entry
-│   ├── components/              # Reusable UI and MFE resilience components
-│   ├── views/                   # Route-level product surfaces
-│   ├── data/                    # Mock product data and theme tokens
-│   ├── styles/                  # Command Center CSS
-│   └── types.ts                 # Shared domain types
-├── package.json
-├── tsconfig.json
-└── vite.config.ts
+apps/
+├── shell/                 # Host app: layout, composition, remote loading
+├── focus/                 # Remote MFE: focus-related workflows
+└── insights/              # Remote MFE: analytics and recommendations
+
+libs/
+└── ui/                    # Shared copy/types used across MFEs
+
+nx.json                    # Nx cache and target defaults
+tsconfig.base.json         # Shared TypeScript config
+vercel.json                # Host deployment config
 ```
 
-The shell is intentionally structured so real remotes can be added behind the existing workspace cards. Until those remotes are wired in, the fallback surface demonstrates how the shell keeps the product usable when a microfrontend is unavailable.
+## How Module Federation Works Here
 
-## Getting Started
+The shell has remote URLs in its Vite federation config:
+
+```ts
+remotes: {
+  focus: 'http://localhost:4201/assets/remoteEntry.js',
+  insights: 'http://localhost:4202/assets/remoteEntry.js',
+}
+```
+
+Each remote exposes a module:
+
+```ts
+exposes: {
+  './Module': './src/RemoteApp.tsx',
+}
+```
+
+Then the shell imports those modules:
+
+```ts
+const FocusRemote = lazy(() => import('focus/Module'));
+const InsightsRemote = lazy(() => import('insights/Module'));
+```
+
+That is the main point of the demo: the shell is not just showing static cards. It is loading remote apps through Module Federation.
+
+## Running Locally
+
+Install dependencies:
 
 ```bash
 npm install
+```
+
+Run the shell and remotes:
+
+```bash
 npm run dev
 ```
 
@@ -115,44 +111,69 @@ Open:
 http://localhost:3000
 ```
 
-## Scripts
+Ports used:
 
-```bash
-npm run dev       # Start the Vite dev server
-npm run build     # Type-check and build for production
-npm run preview   # Preview the production build locally
+```txt
+shell:    http://localhost:3000
+focus:    http://localhost:4201
+insights: http://localhost:4202
 ```
 
-## Deployment
+The shell runs with the Vite dev server. The remotes are built and served as static federated artifacts so their `remoteEntry.js` files behave like CDN-hosted remotes.
 
-This repo is ready for Vercel. The root `vercel.json` builds the `shell` workspace and serves `shell/dist`.
+## Build Commands
 
-Recommended Vercel settings:
+Build everything:
 
-- Framework Preset: `Vite`
-- Build Command: `npm run build`
-- Output Directory: `shell/dist`
-- Install Command: `npm install`
+```bash
+npm run build
+```
 
-## Recruiter / Reviewer Notes
+Build one app:
 
-This project is meant to show more than basic React rendering. It demonstrates:
+```bash
+npm run build:shell
+npm run build:focus
+npm run build:insights
+```
 
-- Component decomposition and UI ownership boundaries
-- Typed React props and shared domain types
-- Product-thinking in a technical demo
-- Resilient shell patterns for microfrontend-style apps
-- Responsive CSS architecture without depending on a heavy UI kit
+Build only affected projects:
 
-## Next Improvements
+```bash
+npm run affected:build
+```
 
-- Add real remote apps using Vite Module Federation
-- Persist personalization settings in local storage
-- Add route URLs for `Today`, `Workspace`, and `Insights`
-- Add unit tests for component behavior
-- Add Playwright smoke tests for the command palette and navigation
+## Deployment Idea
 
-## Author
+The output folders are separate:
 
-**Pradeep Kumar Dharmavarapu**  
-[LinkedIn](https://linkedin.com/in/pradeep-kumar-dharmavarapu) · [GitHub](https://github.com/pradeep-kumar-dharmavarapu)
+```txt
+dist/apps/shell
+dist/apps/focus
+dist/apps/insights
+```
+
+In a real deployment, I would deploy the shell to Vercel or another static host, and deploy each remote to its own CDN/static hosting path. The shell would then point to the deployed `remoteEntry.js` URLs.
+
+## Vercel
+
+The current `vercel.json` is set up for deploying the shell:
+
+```json
+{
+  "outputDirectory": "dist/apps/shell",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install"
+}
+```
+
+For a portfolio demo, deploying the shell is enough to show the UI and structure. For a complete production-style demo, I would also deploy `focus` and `insights` separately and update the shell remote URLs.
+
+## What I Want This Project To Show
+
+- I understand Nx monorepo structure.
+- I can separate host and remote apps cleanly.
+- I can wire Module Federation instead of only describing it.
+- I can build each microfrontend separately.
+- I can explain the architecture through the UI itself.
+- I can keep the design simple, light, and enterprise-friendly.
