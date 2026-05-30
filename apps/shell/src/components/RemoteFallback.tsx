@@ -1,4 +1,6 @@
 export function RemoteFallback({ name }: { name: string }) {
+  const remoteKey = name.toLowerCase().replace(/\s+mfe$/i, '').replace(/\s+/g, '-');
+
   return (
     <section className="remote-fallback">
       <div className="remote-mark">MF</div>
@@ -10,7 +12,7 @@ export function RemoteFallback({ name }: { name: string }) {
           the experience polished even when a remote is offline or still being built.
         </p>
       </div>
-      <code>{name.toLowerCase()}Remote: https://cdn.example.com/{name.toLowerCase()}/remoteEntry.js</code>
+      <code>{remoteKey}Remote: https://cdn.example.com/{remoteKey}/remoteEntry.js</code>
     </section>
   );
 }

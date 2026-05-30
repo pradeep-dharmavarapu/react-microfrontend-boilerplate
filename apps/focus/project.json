@@ -1,0 +1,34 @@
+{
+  "name": "focus",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/focus/src",
+  "projectType": "application",
+  "tags": ["scope:personal-ops", "type:remote"],
+  "targets": {
+    "build": {
+      "executor": "@nx/vite:build",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/focus",
+        "configFile": "apps/focus/vite.config.ts",
+        "tsConfig": "apps/focus/tsconfig.json"
+      }
+    },
+    "serve": {
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "focus:build",
+        "staticFilePath": "dist/apps/focus",
+        "port": 4201,
+        "cors": true,
+        "spa": true
+      }
+    },
+    "preview": {
+      "executor": "@nx/vite:preview-server",
+      "options": {
+        "buildTarget": "focus:build"
+      }
+    }
+  }
+}
